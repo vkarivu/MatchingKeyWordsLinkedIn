@@ -138,104 +138,105 @@
     }
 
     // Create floating UI for matching keywords
-    function createFloatingUIMatching(matchingKeywords) {
-        const existingUI = document.getElementById('floating-keywords-matching');
-        if (existingUI) {
-            existingUI.remove();
-        }
-
-        const container = document.createElement('div');
-        container.id = 'floating-keywords-matching';
-        container.style.position = 'fixed';
-        container.style.bottom = '160px'; // Positioned above the red UI
-        container.style.left = '20px';
-        container.style.zIndex = '1000';
-        container.style.backgroundColor = 'blue';
-        container.style.border = '1px solid #ccc';
-        container.style.borderRadius = '5px';
-        container.style.padding = '10px';
-        container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-        container.style.fontSize = '14px';
-        container.style.fontFamily = 'Arial, sans-serif';
-        container.style.maxWidth = '220px';
-        container.style.opacity = '0.85'; // Set opacity to slightly transparent
-
-        const title = document.createElement('h4');
-        title.textContent = 'MatchingWords:';
-        title.style.margin = '0 0 10px 0';
-        title.style.fontSize = '16px';
-        title.style.color = 'white';
-        container.appendChild(title);
-
-        if (matchingKeywords.length > 0) {
-            const list = document.createElement('ul');
-            list.style.paddingLeft = '20px';
-            matchingKeywords.forEach(keyword => {
-                const listItem = document.createElement('li');
-                listItem.textContent = keyword;
-                listItem.style.color = 'white';
-                list.appendChild(listItem);
-            });
-            container.appendChild(list);
-        } else {
-            const noMatch = document.createElement('p');
-            noMatch.textContent = 'No matching found.';
-            noMatch.style.color = 'white';
-            container.appendChild(noMatch);
-        }
-
-        document.body.appendChild(container);
+  // Create floating UI for matching keywords
+function createFloatingUIMatching(matchingKeywords) {
+    const existingUI = document.getElementById('floating-keywords-matching');
+    if (existingUI) {
+        existingUI.remove();
     }
 
-    // Create floating UI for non-matching keywords
-    function createFloatingUINonMatching(nonMatchingKeywords) {
-        const existingUI = document.getElementById('floating-keywords-nonmatching');
-        if (existingUI) {
-            existingUI.remove();
-        }
+    const container = document.createElement('div');
+    container.id = 'floating-keywords-matching';
+    container.style.position = 'fixed';
+    container.style.bottom = '20px'; // Positioned at the bottom-left corner
+    container.style.left = '20px';
+    container.style.zIndex = '1000';
+    container.style.backgroundColor = 'blue';
+    container.style.border = '1px solid #ccc';
+    container.style.borderRadius = '5px';
+    container.style.padding = '10px';
+    container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    container.style.fontSize = '14px';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.maxWidth = '220px';
+    container.style.opacity = '0.85';
 
-        const container = document.createElement('div');
-        container.id = 'floating-keywords-nonmatching';
-        container.style.position = 'fixed';
-        container.style.bottom = '20px';  // Set at the bottom of the page
-        container.style.left = '20px';
-        container.style.zIndex = '1000';
-        container.style.backgroundColor = 'red';
-        container.style.border = '1px solid #ccc';
-        container.style.borderRadius = '5px';
-        container.style.padding = '10px';
-        container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-        container.style.fontSize = '14px';
-        container.style.fontFamily = 'Arial, sans-serif';
-        container.style.maxWidth = '220px';
-        container.style.opacity = '0.85'; // Set opacity to slightly transparent
+    const title = document.createElement('h4');
+    title.textContent = 'Matching Keywords:';
+    title.style.margin = '0 0 10px 0';
+    title.style.fontSize = '16px';
+    title.style.color = 'white';
+    container.appendChild(title);
 
-        const title = document.createElement('h4');
-        title.textContent = 'Non-Matching:';
-        title.style.margin = '0 0 10px 0';
-        title.style.fontSize = '16px';
-        title.style.color = 'white';
-        container.appendChild(title);
-
-        if (nonMatchingKeywords.length > 0) {
-            const list = document.createElement('ul');
-            list.style.paddingLeft = '20px';
-            nonMatchingKeywords.forEach(keyword => {
-                const listItem = document.createElement('li');
-                listItem.textContent = keyword;
-                listItem.style.color = 'white';
-                list.appendChild(listItem);
-            });
-            container.appendChild(list);
-        } else {
-            const noMatch = document.createElement('p');
-            noMatch.textContent = 'No non-matching keywords found.';
-            noMatch.style.color = 'white';
-            container.appendChild(noMatch);
-        }
-
-        document.body.appendChild(container);
+    if (matchingKeywords.length > 0) {
+        const list = document.createElement('ul');
+        list.style.paddingLeft = '20px';
+        matchingKeywords.forEach(keyword => {
+            const listItem = document.createElement('li');
+            listItem.textContent = keyword;
+            listItem.style.color = 'white';
+            list.appendChild(listItem);
+        });
+        container.appendChild(list);
+    } else {
+        const noMatch = document.createElement('p');
+        noMatch.textContent = 'No matching keywords found.';
+        noMatch.style.color = 'white';
+        container.appendChild(noMatch);
     }
+
+    document.body.appendChild(container);
+}
+
+// Create floating UI for non-matching keywords
+function createFloatingUINonMatching(nonMatchingKeywords) {
+    const existingUI = document.getElementById('floating-keywords-nonmatching');
+    if (existingUI) {
+        existingUI.remove();
+    }
+
+    const container = document.createElement('div');
+    container.id = 'floating-keywords-nonmatching';
+    container.style.position = 'fixed';
+    container.style.bottom = '150px';  // Positioned directly above the matching keywords UI
+    container.style.left = '20px';     // Align with the matching UI's left corner
+    container.style.zIndex = '9999';   // Slightly below in stacking context
+    container.style.backgroundColor = 'red';
+    container.style.border = '1px solid #ccc';
+    container.style.borderRadius = '5px';
+    container.style.padding = '10px';
+    container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    container.style.fontSize = '14px';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.maxWidth = '220px';
+    container.style.opacity = '0.85';
+
+    const title = document.createElement('h4');
+    title.textContent = 'Non-Matching Keywords:';
+    title.style.margin = '0 0 10px 0';
+    title.style.fontSize = '16px';
+    title.style.color = 'white';
+    container.appendChild(title);
+
+    if (nonMatchingKeywords.length > 0) {
+        const list = document.createElement('ul');
+        list.style.paddingLeft = '20px';
+        nonMatchingKeywords.forEach(keyword => {
+            const listItem = document.createElement('li');
+            listItem.textContent = keyword;
+            listItem.style.color = 'white';
+            list.appendChild(listItem);
+        });
+        container.appendChild(list);
+    } else {
+        const noMatch = document.createElement('p');
+        noMatch.textContent = 'No non-matching keywords found.';
+        noMatch.style.color = 'white';
+        container.appendChild(noMatch);
+    }
+
+    document.body.appendChild(container);
+}
 
     // Handle the job description processing
     function processJobDescription() {
