@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Global Keyword Checker
+// @name         Global Keyword Checker with Load Wait
 // @namespace    http://tampermonkey.net/
 // @version      2024-09-11
-// @description  Script to check any webpage (except LinkedIn) for predefined keywords and display them in a floating UI.
+// @description  Script to check any webpage (except LinkedIn) for predefined keywords and display them in two floating UIs for matching and non-matching keywords after the page is fully loaded and idle.
 // @author       You
 // @match        *://*/*
 // @exclude      *://www.linkedin.com/*
@@ -12,8 +12,105 @@
 (function() {
     'use strict';
 
-    // Hardcoded list of keywords to match
-    const keywordList = ['spring', 'spring boot', 'java', 'react', 'aws', 'docker', 'kubernetes'];
+    // Hardcoded list of matching and non-matching keywords
+    const matchingKeywordList = ['spring', 'spring boot', 'java', 'react', 'aws', 'docker', 'kubernetes'];
+    //const nonMatchingKeywordList = ['php', 'ruby', 'go', 'swift', 'perl', 'kotlin', 'r', 'scala'];
+    const nonMatchingKeywordList = [
+  // Programming Languages
+  'java', 'python', 'javascript', 'typescript', 'ruby', 'php', 'c#', 'c++', 'go', 'swift', 'kotlin', 'perl',
+  'r', 'scala', 'rust', 'objective-c', 'bash', 'shell', 'elixir', 'lua', 'haskell', 'fortran', 'cobol', 'dart',
+  'groovy', 'matlab', 'f#', 'pascal', 'visual basic', 'assembly', 'sas', 'vhdl', 'verilog', 'tcl', 'coffeescript',
+
+  // Web Development Frameworks
+  'react', 'angular', 'vue.js', 'svelte', 'jquery', 'backbone.js', 'ember.js', 'next.js', 'nuxt.js', 'gatsby',
+  'express.js', 'nest.js', 'spring', 'spring boot', 'flask', 'django', 'ruby on rails', 'laravel', 'symfony',
+  'asp.net', 'meteor.js', 'play framework', 'hapi.js', 'koa.js', 'phoenix', 'pyramid', 'bottle', 'cherrypy',
+
+  // Databases
+  'mysql', 'postgresql', 'mongodb', 'sqlite', 'redis', 'cassandra', 'dynamodb', 'mariadb', 'oracle db',
+  'microsoft sql server', 'couchdb', 'neo4j', 'firebase', 'couchbase', 'cockroachdb', 'elasticsearch',
+  'memcached', 'influxdb', 'hbase', 'db2', 'arangodb', 'tarantool', 'amazon rds', 'timescaledb', 'greenplum',
+  'clickhouse', 'snowflake', 'rockset', 'tidb', 'hypertable', 'orientdb', 'janusgraph', 'open tsdb', 'prometheus',
+
+  // DevOps & CI/CD Tools
+  'docker', 'kubernetes', 'jenkins', 'travis ci', 'circleci', 'gitlab ci/cd', 'teamcity', 'ansible', 'terraform',
+  'chef', 'puppet', 'vagrant', 'bamboo', 'helm', 'argocd', 'rancher', 'mesos', 'openshift', 'packer', 'consul',
+  'vault', 'istio', 'linkerd', 'nomad', 'spinnaker', 'harbor', 'fluxcd', 'tekton', 'aws codepipeline', 'azdo',
+  'skaffold', 'werf', 'prometheus operator', 'loki', 'envoy', 'calico', 'flannel', 'cilium', 'metallb',
+
+  // Cloud Platforms & Services
+  'aws', 'azure', 'google cloud platform', 'ibm cloud', 'oracle cloud', 'alibaba cloud', 'digitalocean',
+  'heroku', 'netlify', 'vercel', 'cloudflare', 'linode', 'vultr', 'rackspace', 'cloud66', 'openstack', 'kops',
+  'aws ec2', 'aws s3', 'aws lambda', 'aws rds', 'aws dynamodb', 'aws sagemaker', 'aws elastic beanstalk',
+  'aws cloudfront', 'aws step functions', 'azure app service', 'azure functions', 'azure devops', 'azure aks',
+  'azure cosmos db', 'gcp app engine', 'gcp cloud run', 'gcp cloud functions', 'gcp bigquery', 'gcp firestore',
+  'ibm watson', 'ibm cloud functions', 'alibaba ecs', 'firebase cloud functions', 'firebase firestore',
+
+  // Version Control & Collaboration Tools
+  'git', 'github', 'gitlab', 'bitbucket', 'mercurial', 'svn', 'perforce', 'bazaar', 'sourceforge', 'tfs',
+  'gitea', 'gogs', 'phabricator', 'subversion', 'clearcase', 'fossil', 'monotone', 'veracity',
+
+  // Testing Frameworks & Tools
+  'selenium', 'junit', 'pytest', 'jest', 'mocha', 'chai', 'cypress', 'testng', 'karma', 'jasmine', 'appium',
+  'robot framework', 'cucumber', 'nightwatch.js', 'protractor', 'playwright', 'xunit', 'webdriverio', 'postman',
+  'soapui', 'katalon', 'gauge', 'loadrunner', 'jmeter', 'gatling', 'locust', 'blazemeter', 'testcafe', 'e2e testing',
+  'nunit', 'phpunit', 'bdd', 'tdd', 'smoke testing', 'exploratory testing', 'usability testing', 'manual testing',
+
+  // Containerization & Orchestration
+  'docker', 'kubernetes', 'openshift', 'docker swarm', 'amazon ecs', 'amazon eks', 'fargate', 'rancher', 'mesos',
+  'nomad', 'k3s', 'portainer', 'kaniko', 'jib', 'buildah', 'podman', 'minikube', 'kind', 'istio', 'linkerd',
+  'envoy', 'traefik', 'cilium', 'calico', 'flannel', 'metallb', 'harbor', 'kubevirt', 'cri-o', 'kubeadm', 'kops',
+  'kubeflow', 'argo workflows', 'argo cd', 'helm', 'skaffold', 'werf', 'flux', 'velero', 'rook', 'openebs',
+
+  // Big Data & Data Engineering
+  'hadoop', 'apache spark', 'apache kafka', 'hive', 'pig', 'flink', 'storm', 'presto', 'druid', 'snowflake',
+  'airflow', 'dbt', 'nifi', 'talend', 'matillion', 'informatica', 'databricks', 'aws glue', 'azure data factory',
+  'google bigquery', 'google dataproc', 'cloudera', 'hortonworks', 'mapr', 'greenplum', 'couchbase', 'tajo',
+  'tez', 'samza', 'kylin', 'logstash', 'elasticsearch', 'kibana', 'grafana', 'prometheus', 'splunk', 'flume',
+  'zookeeper', 'pulsar', 'clickhouse', 'influxdb', 'aws kinesis', 'gcp pub/sub', 'gcp dataflow', 'confluent',
+
+  // AI, Machine Learning & Data Science
+  'tensorflow', 'pytorch', 'keras', 'scikit-learn', 'opencv', 'nltk', 'spacy', 'pandas', 'numpy', 'matplotlib',
+  'seaborn', 'xgboost', 'lightgbm', 'fastai', 'statsmodels', 'catboost', 'dask', 'mlflow', 'h2o', 'gensim',
+  'tesseract', 'tensorflow serving', 'kubeflow', 'aws sagemaker', 'azure ml', 'google ai platform', 'mllib',
+  'bigml', 'databricks', 'kaggle', 'dataiku', 'h2o.ai', 'rapidminer', 'knime', 'spss', 'tableau', 'power bi',
+
+  // Mobile Development Frameworks
+  'flutter', 'react native', 'xamarin', 'ionic', 'cordova', 'phonegap', 'native script', 'swift', 'kotlin',
+  'android sdk', 'ios sdk', 'objective-c', 'android ndk', 'unity', 'unreal engine', 'pwa', 'weex', 'electron',
+  'capacitor', 'framework7', 'quasar', 'titanium', 'appcelerator', 'phonegap build',
+
+  // API & Backend Technologies
+  'rest', 'graphql', 'grpc', 'soap', 'websockets', 'oauth', 'jwt', 'openid', 'rpc', 'socket.io', 'thrift', 'rpc',
+  'json', 'xml', 'protobuf', 'msgpack', 'amazon api gateway', 'nginx', 'apache http server', 'haproxy', 'kestrel',
+  'traefik', 'kong', 'tyk', 'microservices', 'serverless', 'fastapi', 'express.js', 'flask', 'spring boot',
+  'netty', 'akka', 'ratpack', 'vert.x', 'ktor', 'loopback', 'asp.net core', 'lambda', 'step functions', 'aws appsync',
+
+  // Security Tools & Technologies
+  'oauth', 'openid connect', 'saml', 'jwt', 'ssl', 'tls', 'https', 'waf', 'web application firewall', 'sast',
+  'dast', 'iast', 'xss', 'csrf', 'owasp', 'snort', 'nmap', 'burp suite', 'metasploit', 'nessus', 'openvas',
+  'wireshark', 'osquery', 'zaproxy', 'mimikatz', 'hashicorp vault', 'letsencrypt', 'ssl labs', 'clamav', 'suricata',
+  'fail2ban', 'auth0', 'okta', 'onelogin', 'veracode', 'qualys', 'tinfoil security', 'aws shield', 'azure sentinel',
+
+  // Networking & Communication Tools
+  'tcp/ip', 'udp', 'dns', 'ftp', 'http', 'https', 'ssh', 'icmp', 'smtp', 'imap', 'pop3', 'telnet', 'dhcp',
+  'dnssec', 'firewall', 'vpn', 'load balancer', 'proxy', 'reverse proxy', 'websockets', 'mqtt', 'grpc',
+  'ipv4', 'ipv6', 'bgp', 'ospf', 'eigrp', 'radius', 'tacacs', 'rip', 'lldp', 'snmp', 'netflow', 'ipsec', 'ssl/tls',
+  'ethernet', 'mpls', 'pppoe', 'openvpn', 'wireguard', 'dnsmasq', 'bird', 'quagga', 'zebra',
+
+  // Build Tools & Package Managers
+  'maven', 'gradle', 'npm', 'yarn', 'webpack', 'parcel', 'babel', 'rollup', 'grunt', 'gulp', 'ant', 'sbt',
+  'rake', 'make', 'cmake', 'autotools', 'boost', 'cargo', 'pip', 'conda', 'gem', 'nuget', 'cabal', 'go modules',
+  'vcpkg', 'buck', 'bazel', 'pants', 'poetry', 'rush', 'lerna', 'eslint', 'prettier', 'tslint', 'stylelint',
+
+  // Miscellaneous Tools & Technologies
+  'elasticsearch', 'logstash', 'kibana', 'grafana', 'prometheus', 'splunk', 'graylog', 'sumologic', 'datadog',
+  'new relic', 'dynatrace', 'appdynamics', 'cloudwatch', 'stackdriver', 'honeycomb', 'jaeger', 'zipkin', 'opentelemetry',
+  'fluentd', 'loki', 'tracing', 'distributed tracing', 'observability', 'monitoring', 'logging', 'metrics', 'alerts',
+  'pagerduty', 'opsgenie', 'victorops', 'statuspage', 'uptimerobot', 'pingdom', 'synthetics', 'chaos engineering',
+  'gremlin', 'chaoskube', 'litmus', 'chaos mesh', 'bugsnag', 'sentry', 'raygun', 'rollbar', 'circuit breaker'
+];
+
 
     // Normalize text to avoid case sensitivity and handle variations
     function normalizeText(text) {
@@ -28,7 +125,7 @@
     }
 
     // Check if keywords are present in the entire page content
-    function checkKeywordsInPageContent(content) {
+    function checkKeywordsInPageContent(content, keywordList) {
         return keywordList.filter(keyword => {
             return isKeywordMatch(keyword, content) ||
                    isKeywordMatch(keyword.replace(/\s+/g, ''), content) || // handle concatenated variations
@@ -36,72 +133,137 @@
         });
     }
 
-    // Create floating UI element
-    function createFloatingUI(matchingKeywords) {
-        // Remove any existing floating UI to prevent duplicates
-        const existingUI = document.getElementById('floating-keywords-ui');
-        if (existingUI) {
-            existingUI.remove();
-        }
-
-        // Create the new floating UI
-        const container = document.createElement('div');
-        container.id = 'floating-keywords-ui';  // Add an ID to easily find and remove it later
-        container.style.position = 'fixed';
-        container.style.bottom = '20px';
-        container.style.left = '20px';
-        container.style.zIndex = '1000';
-        container.style.backgroundColor = 'red';  // Background color is red
-        container.style.border = '1px solid #ccc';
-        container.style.borderRadius = '5px';
-        container.style.padding = '10px';
-        container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-        container.style.fontSize = '14px';
-        container.style.fontFamily = 'Arial, sans-serif';
-        container.style.maxWidth = '220px';  // Slightly increased max width
-
-        const title = document.createElement('h4');
-        title.textContent = 'Matching Keywords:';
-        title.style.margin = '0 0 10px 0';
-        title.style.fontSize = '16px';
-        title.style.color = 'white';  // Change title text color to white
-        container.appendChild(title);
-
-        // Check if there are any matching keywords
-        if (matchingKeywords.length > 0) {
-            const list = document.createElement('ul');
-            list.style.paddingLeft = '20px';  // Add padding to align bullets inside the box
-            matchingKeywords.forEach(keyword => {
-                const listItem = document.createElement('li');
-                listItem.textContent = keyword;
-                listItem.style.color = 'white';  // Change list item text color to white
-                list.appendChild(listItem);
-            });
-            container.appendChild(list);
-        } else {
-            const noMatch = document.createElement('p');
-            noMatch.textContent = 'No keywords found in the page.';
-            noMatch.style.color = 'white';  // Change no match text color to white
-            container.appendChild(noMatch);
-        }
-
-        // Append the floating UI to the body
-        document.body.appendChild(container);
-
-        console.log('Floating UI created:', container); // Debugging log
+    // Create floating UI for matching keywords
+ // Create floating UI for matching keywords
+function createFloatingUIMatching(matchingKeywords) {
+    const existingUI = document.getElementById('floating-keywords-matching');
+    if (existingUI) {
+        existingUI.remove();
     }
+
+    const container = document.createElement('div');
+    container.id = 'floating-keywords-matching';
+    container.style.position = 'fixed';
+    container.style.bottom = '20px'; // Positioned at the bottom-left corner
+    container.style.left = '20px';
+    container.style.zIndex = '1000';
+    container.style.backgroundColor = 'blue';
+    container.style.border = '1px solid #ccc';
+    container.style.borderRadius = '5px';
+    container.style.padding = '10px';
+    container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    container.style.fontSize = '14px';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.maxWidth = '220px';
+    container.style.opacity = '0.85';
+
+    const title = document.createElement('h4');
+    title.textContent = 'Matching Keywords:';
+    title.style.margin = '0 0 10px 0';
+    title.style.fontSize = '16px';
+    title.style.color = 'white';
+    container.appendChild(title);
+
+    if (matchingKeywords.length > 0) {
+        const list = document.createElement('ul');
+        list.style.paddingLeft = '20px';
+        matchingKeywords.forEach(keyword => {
+            const listItem = document.createElement('li');
+            listItem.textContent = keyword;
+            listItem.style.color = 'white';
+            list.appendChild(listItem);
+        });
+        container.appendChild(list);
+    } else {
+        const noMatch = document.createElement('p');
+        noMatch.textContent = 'No matching keywords found.';
+        noMatch.style.color = 'white';
+        container.appendChild(noMatch);
+    }
+
+    document.body.appendChild(container);
+}
+
+// Create floating UI for non-matching keywords
+function createFloatingUINonMatching(nonMatchingKeywords) {
+    const existingUI = document.getElementById('floating-keywords-nonmatching');
+    if (existingUI) {
+        existingUI.remove();
+    }
+
+    const container = document.createElement('div');
+    container.id = 'floating-keywords-nonmatching';
+    container.style.position = 'fixed';
+    container.style.bottom = '150px';  // Positioned directly above the matching keywords UI
+    container.style.left = '20px';     // Align with the matching UI's left corner
+    container.style.zIndex = '9999';   // Slightly below in stacking context
+    container.style.backgroundColor = 'red';
+    container.style.border = '1px solid #ccc';
+    container.style.borderRadius = '5px';
+    container.style.padding = '10px';
+    container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    container.style.fontSize = '14px';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.maxWidth = '220px';
+    container.style.opacity = '0.85';
+
+    const title = document.createElement('h4');
+    title.textContent = 'Non-Matching Keywords:';
+    title.style.margin = '0 0 10px 0';
+    title.style.fontSize = '16px';
+    title.style.color = 'white';
+    container.appendChild(title);
+
+    if (nonMatchingKeywords.length > 0) {
+        const list = document.createElement('ul');
+        list.style.paddingLeft = '20px';
+        nonMatchingKeywords.forEach(keyword => {
+            const listItem = document.createElement('li');
+            listItem.textContent = keyword;
+            listItem.style.color = 'white';
+            list.appendChild(listItem);
+        });
+        container.appendChild(list);
+    } else {
+        const noMatch = document.createElement('p');
+        noMatch.textContent = 'No non-matching keywords found.';
+        noMatch.style.color = 'white';
+        container.appendChild(noMatch);
+    }
+
+    document.body.appendChild(container);
+}
+
 
     // Handle checking the entire page content for keywords
     function processPageContent() {
         const pageContent = document.body.innerText; // Get all text from the page
-        const matchingKeywords = checkKeywordsInPageContent(pageContent);
+        console.log("Page content: ", pageContent);
+
+        const matchingKeywords = checkKeywordsInPageContent(pageContent, matchingKeywordList);
+        const nonMatchingKeywords = checkKeywordsInPageContent(pageContent, nonMatchingKeywordList);
+
         console.log('Matching Keywords:', matchingKeywords);
-        createFloatingUI(matchingKeywords);  // Display floating UI with the results
+        console.log('Non-Matching Keywords:', nonMatchingKeywords);
+
+        createFloatingUIMatching(matchingKeywords); // Blue UI for matching keywords
+        createFloatingUINonMatching(nonMatchingKeywords); // Red UI for non-matching keywords
     }
 
-    // Run the content check after the page is fully loaded
-    window.addEventListener('load', () => {
-        processPageContent();
-    });
+    // Wait until the page is completely loaded and then idle
+    function waitForPageIdle() {
+        window.addEventListener('load', () => {
+            console.log('Page has loaded. Waiting for idle state...');
+            setTimeout(() => {
+                requestIdleCallback(() => {
+                    console.log('Page is idle, now processing content.');
+                    processPageContent();
+                });
+            }, 2000); // Wait for 2 seconds before checking idle
+        });
+    }
+
+    // Run the content check after the page is fully loaded and idle
+    waitForPageIdle();
 
 })();
