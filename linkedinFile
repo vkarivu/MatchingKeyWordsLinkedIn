@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Job Description Keyword Checker with Two Floating UIs
+// @name         Linkedin KeyWord MAtching UIs
 // @namespace    http://tampermonkey.net/
 // @version      2024-09-11
 // @description  Script to extract and compare job descriptions with predefined lists of matching and non-matching keywords, and display them in two floating UIs.
@@ -21,7 +21,7 @@
     const nonMatchingKeywordsList = [
   // Programming Languages
   'java', 'python', 'javascript', 'typescript', 'ruby', 'php', 'c#', 'c++', 'go', 'swift', 'kotlin', 'perl',
-  'r', 'scala', 'rust', 'objective-c', 'bash', 'shell', 'elixir', 'lua', 'haskell', 'fortran', 'cobol', 'dart',
+  'scala', 'rust', 'objective-c', 'bash', 'shell', 'elixir', 'lua', 'haskell', 'fortran', 'cobol', 'dart',
   'groovy', 'matlab', 'f#', 'pascal', 'visual basic', 'assembly', 'sas', 'vhdl', 'verilog', 'tcl', 'coffeescript',
 
   // Web Development Frameworks
@@ -66,7 +66,7 @@
   'kubeflow', 'argo workflows', 'argo cd', 'helm', 'skaffold', 'werf', 'flux', 'velero', 'rook', 'openebs',
 
   // Big Data & Data Engineering
-  'hadoop', 'apache spark', 'apache kafka', 'hive', 'pig', 'flink', 'storm', 'presto', 'druid', 'snowflake',
+  'hadoop', 'apache spark', 'apache kafka', 'hive', 'flink', 'storm', 'presto', 'druid', 'snowflake',
   'airflow', 'dbt', 'nifi', 'talend', 'matillion', 'informatica', 'databricks', 'aws glue', 'azure data factory',
   'google bigquery', 'google dataproc', 'cloudera', 'hortonworks', 'mapr', 'greenplum', 'couchbase', 'tajo',
   'tez', 'samza', 'kylin', 'logstash', 'elasticsearch', 'kibana', 'grafana', 'prometheus', 'splunk', 'flume',
@@ -79,13 +79,13 @@
   'bigml', 'databricks', 'kaggle', 'dataiku', 'h2o.ai', 'rapidminer', 'knime', 'spss', 'tableau', 'power bi',
 
   // Mobile Development Frameworks
-  'flutter', 'react native', 'xamarin', 'ionic', 'cordova', 'phonegap', 'native script', 'swift', 'kotlin',
-  'android sdk', 'ios sdk', 'objective-c', 'android ndk', 'unity', 'unreal engine', 'pwa', 'weex', 'electron',
+  'flutter', 'react native', 'xamarin', 'cordova', 'phonegap', 'native script', 'swift', 'kotlin',
+  'android sdk', 'ios sdk', 'objective-c', 'android ndk', 'unreal engine', 'pwa', 'weex', 'electron',
   'capacitor', 'framework7', 'quasar', 'titanium', 'appcelerator', 'phonegap build',
 
   // API & Backend Technologies
   'rest', 'graphql', 'grpc', 'soap', 'websockets', 'oauth', 'jwt', 'openid', 'rpc', 'socket.io', 'thrift', 'rpc',
-  'json', 'xml', 'protobuf', 'msgpack', 'amazon api gateway', 'nginx', 'apache http server', 'haproxy', 'kestrel',
+  'xml', 'protobuf', 'msgpack', 'amazon api gateway', 'nginx', 'apache http server', 'haproxy', 'kestrel',
   'traefik', 'kong', 'tyk', 'microservices', 'serverless', 'fastapi', 'express.js', 'flask', 'spring boot',
   'netty', 'akka', 'ratpack', 'vert.x', 'ktor', 'loopback', 'asp.net core', 'lambda', 'step functions', 'aws appsync',
 
@@ -102,8 +102,8 @@
   'ethernet', 'mpls', 'pppoe', 'openvpn', 'wireguard', 'dnsmasq', 'bird', 'quagga', 'zebra',
 
   // Build Tools & Package Managers
-  'maven', 'gradle', 'npm', 'yarn', 'webpack', 'parcel', 'babel', 'rollup', 'grunt', 'gulp', 'ant', 'sbt',
-  'rake', 'make', 'cmake', 'autotools', 'boost', 'cargo', 'pip', 'conda', 'gem', 'nuget', 'cabal', 'go modules',
+  'maven', 'gradle', 'npm', 'yarn', 'webpack', 'parcel', 'babel', 'rollup', 'grunt', 'gulp',
+  'rake', 'make', 'cmake', 'autotools', 'boost', 'cargo', 'pip', 'conda', 'nuget', 'cabal', 'go modules',
   'vcpkg', 'buck', 'bazel', 'pants', 'poetry', 'rush', 'lerna', 'eslint', 'prettier', 'tslint', 'stylelint',
 
   // Miscellaneous Tools & Technologies
@@ -113,6 +113,7 @@
   'pagerduty', 'opsgenie', 'victorops', 'statuspage', 'uptimerobot', 'pingdom', 'synthetics', 'chaos engineering',
   'gremlin', 'chaoskube', 'litmus', 'chaos mesh', 'bugsnag', 'sentry', 'raygun', 'rollbar', 'circuit breaker'
 ];
+
 
 
 
@@ -162,7 +163,7 @@ function createFloatingUIMatching(matchingKeywords) {
     container.style.opacity = '0.85';
 
     const title = document.createElement('h4');
-    title.textContent = 'Matching Keywords:';
+    title.textContent = 'Matching:';
     title.style.margin = '0 0 10px 0';
     title.style.fontSize = '16px';
     title.style.color = 'white';
@@ -212,7 +213,7 @@ function createFloatingUINonMatching(nonMatchingKeywords) {
     container.style.opacity = '0.85';
 
     const title = document.createElement('h4');
-    title.textContent = 'Non-Matching Keywords:';
+    title.textContent = 'Non-Matching:';
     title.style.margin = '0 0 10px 0';
     title.style.fontSize = '16px';
     title.style.color = 'white';
@@ -245,8 +246,8 @@ function createFloatingUINonMatching(nonMatchingKeywords) {
             const matchingKeywords = checkKeywordsInDescription(descriptionElement.innerText, keywordList);
             const nonMatchingKeywords = checkKeywordsInDescription(descriptionElement.innerText, nonMatchingKeywordsList);
 
-            console.log('Matching Keywords:', matchingKeywords);
-            console.log('Non-Matching Keywords:', nonMatchingKeywords);
+            console.log('Matching:', matchingKeywords);
+            console.log('Non-Matching:', nonMatchingKeywords);
 
             createFloatingUIMatching(matchingKeywords); // Blue UI for matching keywords
             createFloatingUINonMatching(nonMatchingKeywords); // Red UI for non-matching keywords
