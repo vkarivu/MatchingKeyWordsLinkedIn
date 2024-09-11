@@ -1,0 +1,107 @@
+// ==UserScript==
+// @name         Global Keyword Checker
+// @namespace    http://tampermonkey.net/
+// @version      2024-09-11
+// @description  Script to check any webpage (except LinkedIn) for predefined keywords and display them in a floating UI.
+// @author       You
+// @match        *://*/*
+// @exclude      *://www.linkedin.com/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Hardcoded list of keywords to match
+    const keywordList = ['spring', 'spring boot', 'java', 'react', 'aws', 'docker', 'kubernetes'];
+
+    // Normalize text to avoid case sensitivity and handle variations
+    function normalizeText(text) {
+        return text.replace(/\s+/g, '').toLowerCase();
+    }
+
+    // Compare keywords, including variations (like "springboot" or "spring_boot")
+    function isKeywordMatch(keyword, text) {
+        const normalizedKeyword = normalizeText(keyword);
+        const normalizedText = normalizeText(text);
+        return normalizedText.includes(normalizedKeyword);
+    }
+
+    // Check if keywords are present in the entire page content
+    function checkKeywordsInPageContent(content) {
+        return keywordList.filter(keyword => {
+            return isKeywordMatch(keyword, content) ||
+                   isKeywordMatch(keyword.replace(/\s+/g, ''), content) || // handle concatenated variations
+                   isKeywordMatch(keyword.replace(/\s+/g, '_'), content);  // handle underscore variations
+        });
+    }
+
+    // Create floating UI element
+    function createFloatingUI(matchingKeywords) {
+        // Remove any existing floating UI to prevent duplicates
+        const existingUI = document.getElementById('floating-keywords-ui');
+        if (existingUI) {
+            existingUI.remove();
+        }
+
+        // Create the new floating UI
+        const container = document.createElement('div');
+        container.id = 'floating-keywords-ui';  // Add an ID to easily find and remove it later
+        container.style.position = 'fixed';
+        container.style.bottom = '20px';
+        container.style.left = '20px';
+        container.style.zIndex = '1000';
+        container.style.backgroundColor = 'red';  // Background color is red
+        container.style.border = '1px solid #ccc';
+        container.style.borderRadius = '5px';
+        container.style.padding = '10px';
+        container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+        container.style.fontSize = '14px';
+        container.style.fontFamily = 'Arial, sans-serif';
+        container.style.maxWidth = '220px';  // Slightly increased max width
+
+        const title = document.createElement('h4');
+        title.textContent = 'Matching Keywords:';
+        title.style.margin = '0 0 10px 0';
+        title.style.fontSize = '16px';
+        title.style.color = 'white';  // Change title text color to white
+        container.appendChild(title);
+
+        // Check if there are any matching keywords
+        if (matchingKeywords.length > 0) {
+            const list = document.createElement('ul');
+            list.style.paddingLeft = '20px';  // Add padding to align bullets inside the box
+            matchingKeywords.forEach(keyword => {
+                const listItem = document.createElement('li');
+                listItem.textContent = keyword;
+                listItem.style.color = 'white';  // Change list item text color to white
+                list.appendChild(listItem);
+            });
+            container.appendChild(list);
+        } else {
+            const noMatch = document.createElement('p');
+            noMatch.textContent = 'No keywords found in the page.';
+            noMatch.style.color = 'white';  // Change no match text color to white
+            container.appendChild(noMatch);
+        }
+
+        // Append the floating UI to the body
+        document.body.appendChild(container);
+
+        console.log('Floating UI created:', container); // Debugging log
+    }
+
+    // Handle checking the entire page content for keywords
+    function processPageContent() {
+        const pageContent = document.body.innerText; // Get all text from the page
+        const matchingKeywords = checkKeywordsInPageContent(pageContent);
+        console.log('Matching Keywords:', matchingKeywords);
+        createFloatingUI(matchingKeywords);  // Display floating UI with the results
+    }
+
+    // Run the content check after the page is fully loaded
+    window.addEventListener('load', () => {
+        processPageContent();
+    });
+
+})();
