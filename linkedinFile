@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Job Description Keyword Checker with URL Change Detection
+// @name         Job Description Keyword Checker with Two Floating UIs
 // @namespace    http://tampermonkey.net/
 // @version      2024-09-11
-// @description  Script to extract and compare job descriptions with a predefined list of keywords after a new job is clicked and the description is fully loaded.
+// @description  Script to extract and compare job descriptions with predefined lists of matching and non-matching keywords, and display them in two floating UIs.
 // @author       You
 // @match        https://www.linkedin.com/jobs/search/*
 // @grant        none
@@ -11,10 +11,14 @@
 (function() {
     'use strict';
 
-    // Hardcoded list of keywords to match
+    // Hardcoded list of matching keywords
     const keywordList = ['spring', 'spring boot', 'java', 'react', 'aws', 'docker', 'kubernetes'];
 
-    const NonMatchingKeyWords = [
+    // Hardcoded list of non-matching keywords (for illustration)
+   // const nonMatchingKeywordsList = [
+
+
+    const nonMatchingKeywordsList = [
   // Programming Languages
   'java', 'python', 'javascript', 'typescript', 'ruby', 'php', 'c#', 'c++', 'go', 'swift', 'kotlin', 'perl',
   'r', 'scala', 'rust', 'objective-c', 'bash', 'shell', 'elixir', 'lua', 'haskell', 'fortran', 'cobol', 'dart',
@@ -124,8 +128,8 @@
         return normalizedText.includes(normalizedKeyword);
     }
 
-    // Check if keywords are present in the job description
-    function checkKeywordsInDescription(description) {
+    // Check if matching keywords are present in the job description
+    function checkKeywordsInDescription(description, keywordList) {
         return keywordList.filter(keyword => {
             return isKeywordMatch(keyword, description) ||
                    isKeywordMatch(keyword.replace(/\s+/g, ''), description) || // handle concatenated variations
@@ -133,85 +137,118 @@
         });
     }
 
+    // Create floating UI for matching keywords
+    function createFloatingUIMatching(matchingKeywords) {
+        const existingUI = document.getElementById('floating-keywords-matching');
+        if (existingUI) {
+            existingUI.remove();
+        }
 
-    function checkNonKeywordsInDescription(description) {
-        return NonMatchingKeyWords.filter(keyword => {
-            return isKeywordMatch(keyword, description) ||
-                   isKeywordMatch(keyword.replace(/\s+/g, ''), description) || // handle concatenated variations
-                   isKeywordMatch(keyword.replace(/\s+/g, '_'), description);  // handle underscore variations
-        });
+        const container = document.createElement('div');
+        container.id = 'floating-keywords-matching';
+        container.style.position = 'fixed';
+        container.style.bottom = '160px'; // Positioned above the red UI
+        container.style.left = '20px';
+        container.style.zIndex = '1000';
+        container.style.backgroundColor = 'blue';
+        container.style.border = '1px solid #ccc';
+        container.style.borderRadius = '5px';
+        container.style.padding = '10px';
+        container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+        container.style.fontSize = '14px';
+        container.style.fontFamily = 'Arial, sans-serif';
+        container.style.maxWidth = '220px';
+        container.style.opacity = '0.85'; // Set opacity to slightly transparent
+
+        const title = document.createElement('h4');
+        title.textContent = 'MatchingWords:';
+        title.style.margin = '0 0 10px 0';
+        title.style.fontSize = '16px';
+        title.style.color = 'white';
+        container.appendChild(title);
+
+        if (matchingKeywords.length > 0) {
+            const list = document.createElement('ul');
+            list.style.paddingLeft = '20px';
+            matchingKeywords.forEach(keyword => {
+                const listItem = document.createElement('li');
+                listItem.textContent = keyword;
+                listItem.style.color = 'white';
+                list.appendChild(listItem);
+            });
+            container.appendChild(list);
+        } else {
+            const noMatch = document.createElement('p');
+            noMatch.textContent = 'No matching found.';
+            noMatch.style.color = 'white';
+            container.appendChild(noMatch);
+        }
+
+        document.body.appendChild(container);
     }
 
+    // Create floating UI for non-matching keywords
+    function createFloatingUINonMatching(nonMatchingKeywords) {
+        const existingUI = document.getElementById('floating-keywords-nonmatching');
+        if (existingUI) {
+            existingUI.remove();
+        }
 
-// Create floating UI element
-function createFloatingUI(matchingKeywords) {
-    // Remove any existing floating UI to prevent duplicates
-    const existingUI = document.getElementById('floating-keywords-ui');
-    if (existingUI) {
-        existingUI.remove();
+        const container = document.createElement('div');
+        container.id = 'floating-keywords-nonmatching';
+        container.style.position = 'fixed';
+        container.style.bottom = '20px';  // Set at the bottom of the page
+        container.style.left = '20px';
+        container.style.zIndex = '1000';
+        container.style.backgroundColor = 'red';
+        container.style.border = '1px solid #ccc';
+        container.style.borderRadius = '5px';
+        container.style.padding = '10px';
+        container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+        container.style.fontSize = '14px';
+        container.style.fontFamily = 'Arial, sans-serif';
+        container.style.maxWidth = '220px';
+        container.style.opacity = '0.85'; // Set opacity to slightly transparent
+
+        const title = document.createElement('h4');
+        title.textContent = 'Non-Matching:';
+        title.style.margin = '0 0 10px 0';
+        title.style.fontSize = '16px';
+        title.style.color = 'white';
+        container.appendChild(title);
+
+        if (nonMatchingKeywords.length > 0) {
+            const list = document.createElement('ul');
+            list.style.paddingLeft = '20px';
+            nonMatchingKeywords.forEach(keyword => {
+                const listItem = document.createElement('li');
+                listItem.textContent = keyword;
+                listItem.style.color = 'white';
+                list.appendChild(listItem);
+            });
+            container.appendChild(list);
+        } else {
+            const noMatch = document.createElement('p');
+            noMatch.textContent = 'No non-matching keywords found.';
+            noMatch.style.color = 'white';
+            container.appendChild(noMatch);
+        }
+
+        document.body.appendChild(container);
     }
-
-    // Create the new floating UI
-    const container = document.createElement('div');
-    container.id = 'floating-keywords-ui';  // Add an ID to easily find and remove it later
-    container.style.position = 'fixed';
-    container.style.bottom = '20px';
-    container.style.left = '20px';
-    container.style.zIndex = '1000';
-    container.style.backgroundColor = 'red';  // Background color is red
-    container.style.border = '1px solid #ccc';
-    container.style.borderRadius = '5px';
-    container.style.padding = '10px';
-    container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-    container.style.fontSize = '14px';
-    container.style.fontFamily = 'Arial, sans-serif';
-    container.style.maxWidth = '220px';  // Slightly increased max width
-
-    const title = document.createElement('h4');
-    title.textContent = 'Matching Keywords:';
-    title.style.margin = '0 0 10px 0';
-    title.style.fontSize = '16px';
-    title.style.color = 'white';  // Change title text color to white
-    container.appendChild(title);
-
-    // Check if there are any matching keywords
-    if (matchingKeywords.length > 0) {
-        const list = document.createElement('ul');
-        list.style.paddingLeft = '20px';  // Add padding to align bullets inside the box
-        matchingKeywords.forEach(keyword => {
-            const listItem = document.createElement('li');
-            listItem.textContent = keyword;
-            listItem.style.color = 'white';  // Change list item text color to white
-            list.appendChild(listItem);
-        });
-        container.appendChild(list);
-    } else {
-        const noMatch = document.createElement('p');
-        noMatch.textContent = 'No keywords found in the description.';
-        noMatch.style.color = 'white';  // Change no match text color to white
-        container.appendChild(noMatch);
-    }
-
-    // Append the floating UI to the body
-    document.body.appendChild(container);
-
-    console.log('Floating UI created:', container); // Debugging log
-}
-
-
-
-
-
 
     // Handle the job description processing
     function processJobDescription() {
         const descriptionElement = document.querySelector('.jobs-description__container');
         if (descriptionElement && descriptionElement.innerText.trim().length > 0) {
-            // console.log('Job description found:', descriptionElement.innerText); // Debugging log
-            const matchingKeywords = checkKeywordsInDescription(descriptionElement.innerText);
-            const nonMatchingKeywords = checkNonKeywordsInDescription(descriptionElement.innerText);
+            const matchingKeywords = checkKeywordsInDescription(descriptionElement.innerText, keywordList);
+            const nonMatchingKeywords = checkKeywordsInDescription(descriptionElement.innerText, nonMatchingKeywordsList);
+
             console.log('Matching Keywords:', matchingKeywords);
-            createFloatingUI(matchingKeywords);
+            console.log('Non-Matching Keywords:', nonMatchingKeywords);
+
+            createFloatingUIMatching(matchingKeywords); // Blue UI for matching keywords
+            createFloatingUINonMatching(nonMatchingKeywords); // Red UI for non-matching keywords
         } else {
             console.log('Job description not available yet.');
         }
